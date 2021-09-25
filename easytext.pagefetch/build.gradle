@@ -1,9 +1,11 @@
 plugins {
     id 'java-library'
-    id 'org.gradle.java.experimental-jigsaw' version '0.1.1'
 }
 
 dependencies {
-    compile 'io.vertx:vertx-web-client:3.5.1'
-    compile 'io.vertx:vertx-rx-java2:3.5.1'
+    implementation "io.vertx:vertx-web-client:$vertxVersion"
+}
+
+java {
+    modularity.inferModulePath = true
 }

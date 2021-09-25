@@ -1,7 +1,8 @@
 package javamodularity.easytext.pagefetch;
 
-import io.reactivex.Single;
+import io.vertx.core.Future;
+
 
 public interface WikipediaFetcher {
-    Single<String> getText(String topic);
+    Future<String> getText(String topic);
 }

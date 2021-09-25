@@ -1,23 +1,24 @@
 package javamodularity.easytext.web;
 
 
-import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
-import io.vertx.reactivex.core.Vertx;
+import io.vertx.core.Vertx;
 import javamodularity.easytext.algorithm.api.Analyzer;
 import javamodularity.easytext.algorithm.api.Preprocessing;
 import javamodularity.easytext.pagefetch.WikipediaFetcher;
 
+import java.util.List;
 import java.util.ServiceLoader;
+import java.util.stream.Collectors;
 
 public class Main {
+
+    private static final int port = 8080;
+
     public static void main(String[] args) {
 
-        var wikipediaFetcher = ServiceLoader.load(WikipediaFetcher.class).findFirst().get();
-
+        var wikipediaFetcher = ServiceLoader.load(WikipediaFetcher.class).findFirst().orElseThrow();
         var analyzers = ServiceLoader.load(Analyzer.class);
-
-        var vertx = ServiceLoader.load(Vertx.class).findFirst().get();
+        var vertx = ServiceLoader.load(Vertx.class).findFirst().orElseThrow();
         var server = vertx.createHttpServer();
 
         server.requestHandler(request -> {
@@ -34,24 +35,18 @@ public class Main {
                 response.putHeader("Connection", "keep-alive");
                 response.putHeader("Cache-Control", "no-cache");
 
-                wikipediaFetcher.getText(topic).subscribeOn(Schedulers.computation()).toObservable()
+                wikipediaFetcher.getText(topic)
                         .map(Preprocessing::toSentences)
-                        .flatMap(text -> Observable.fromIterable(analyzers).flatMap(a -> Observable.create(observer -> {
-                            var result = a.getName() + ": " + a.analyze(text);
-                            observer.onNext(result);
-                        }).subscribeOn(Schedulers.computation())))
-                        .subscribe(text -> {
-                            response.write(text + "\n");
-                            System.out.println(text);
-                        }, err -> {
-                            err.printStackTrace();
-                            response.setStatusCode(500);
-                            response.end();
-                        }, response::end);
+                        .map((List<List<String>> text) -> analyzers.stream()
+                                .map(ServiceLoader.Provider::get)
+                                .map(analyzer -> "%s: %f".formatted(analyzer.getName(), analyzer.analyze(text))))
+                        .onSuccess(analysisResults -> response.end(analysisResults.collect(Collectors.joining("\n"))))
+                        .onFailure(ex -> response.setStatusCode(500).end(ex.getMessage()));
             }
 
         });
 
-        server.listen(8080, result -> System.out.println("Server listening: " + result.succeeded()));
+        server.listen(port, result -> System.out.printf("Server listening on port %d: %s\n\n", port, result.succeeded()));
     }
+
 }

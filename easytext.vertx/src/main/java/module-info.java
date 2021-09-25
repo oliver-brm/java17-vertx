@@ -1,6 +1,5 @@
 module easytext.vertx {
-    requires transitive vertx.rx.java2;
-
-    provides io.vertx.reactivex.core.Vertx with javamodularity.easytext.vertx.VertxProvider;
+    requires transitive io.vertx.core;
+    provides io.vertx.core.Vertx with javamodularity.easytext.vertx.VertxProvider;
 
 }

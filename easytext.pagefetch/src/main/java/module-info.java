@@ -3,12 +3,11 @@ import javamodularity.easytext.pagefetch.impl.WikipediaFetchImpl;
 
 module easytext.pagefetch {
 
-    requires vertx.rx.java2;
-    requires vertx.web.client;
-    requires io.reactivex.rxjava2;
+    requires io.vertx.core;
+    requires io.vertx.web.client;
     exports javamodularity.easytext.pagefetch;
 
-    uses io.vertx.reactivex.core.Vertx;
+    uses io.vertx.core.Vertx;
     provides WikipediaFetcher with WikipediaFetchImpl;
 
 }
