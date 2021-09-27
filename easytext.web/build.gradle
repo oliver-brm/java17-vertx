@@ -1,6 +1,8 @@
 plugins {
     id 'java'
     id 'application'
+    id 'distribution'
+    id "org.beryx.jlink" version "2.24.2"
 }
 
 dependencies {
@@ -9,6 +11,7 @@ dependencies {
     implementation project(':easytext.vertx')
     implementation project(':easytext.algorithm.api')
 
+    runtimeOnly "io.netty:netty-transport-native-kqueue:$nettyVersion"
     runtimeOnly project(':easytext.algorithm.coleman')
     runtimeOnly project(':easytext.algorithm.kincaid')
     runtimeOnly project(':easytext.algorithm.naivesyllablecounter')
@@ -21,4 +24,28 @@ java {
 application {
     mainClass = "javamodularity.easytext.web.Main"
     mainModule = "easytext.web"
+}
+jlink {
+    mergedModule {
+        mergedModuleName = "easytext.mergedmodule"
+        uses "io.vertx.core.spi.VerticleFactory"
+        uses "io.vertx.core.spi.VertxServiceProvider"
+        excludeProvides servicePattern: "reactor.blockhound.integration.*"
+    }
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    launcher {
+        name = 'easytext'
+        customImage {
+            appModules = appModules + [
+                    "easytext.web",
+                    "easytext.vertx",
+                    "easytext.pagefetch",
+                    "easytext.algorithm.api",
+                    "easytext.algorithm.coleman",
+                    "easytext.algorithm.kincaid",
+                    "easytext.algorithm.naivesyllablecounter",
+                    jlink.mergedModuleName.get()]
+        }
+        //jvmArgs = ['-Dlog4j.configurationFile=./log4j2.xml']
+    }
 }

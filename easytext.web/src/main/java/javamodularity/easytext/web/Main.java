@@ -1,6 +1,7 @@
 package javamodularity.easytext.web;
 
 
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import javamodularity.easytext.algorithm.api.Analyzer;
 import javamodularity.easytext.algorithm.api.Preprocessing;
@@ -37,7 +38,7 @@ public class Main {
 
                 wikipediaFetcher.getText(topic)
                         .map(Preprocessing::toSentences)
-                        .map((List<List<String>> text) -> analyzers.stream()
+                        .map(text -> analyzers.stream()
                                 .map(ServiceLoader.Provider::get)
                                 .map(analyzer -> "%s: %f".formatted(analyzer.getName(), analyzer.analyze(text))))
                         .onSuccess(analysisResults -> response.end(analysisResults.collect(Collectors.joining("\n"))))

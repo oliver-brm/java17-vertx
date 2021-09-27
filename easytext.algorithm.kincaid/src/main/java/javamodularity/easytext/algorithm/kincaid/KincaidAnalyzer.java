@@ -9,15 +9,12 @@ import javamodularity.easytext.algorithm.api.SyllableCounter;
 
 public class KincaidAnalyzer implements Analyzer {
 
-   private SyllableCounter syllableCounter;
+   private final SyllableCounter syllableCounter;
 
    public KincaidAnalyzer() {
-      var counters = ServiceLoader.load(SyllableCounter.class).iterator();
-      if(counters.hasNext()) {
-         this.syllableCounter =  counters.next();
-      } else {
-         throw new IllegalStateException("SyllableCounter not found");
-      }
+      syllableCounter = ServiceLoader.load(SyllableCounter.class)
+              .findFirst()
+              .orElseThrow(() -> new IllegalStateException("SyllableCounter not found"));
    }
 
    public String getName() {
@@ -25,13 +22,13 @@ public class KincaidAnalyzer implements Analyzer {
    }
 
    public double analyze(List<List<String>> sentences) {
-      float totalsentences = sentences.size();
-      float totalwords = sentences.stream().mapToInt(List::size).sum();
-      float totalsyllables = sentences.stream()
+      float totalSentences = sentences.size();
+      float totalWords = sentences.stream().mapToInt(List::size).sum();
+      float totalSyllables = sentences.stream()
          .flatMapToInt(sentence ->
-            sentence.stream().mapToInt(word -> syllableCounter.countSyllables(word)))
+            sentence.stream().mapToInt(syllableCounter::countSyllables))
          .sum();
-      return 206.835 - 1.015 * (totalwords / totalsentences) - 84.6 * (totalsyllables / totalwords);
+      return 206.835 - 1.015 * (totalWords / totalSentences) - 84.6 * (totalSyllables / totalWords);
    }
 
 }
