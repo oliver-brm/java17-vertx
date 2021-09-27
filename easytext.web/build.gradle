@@ -1,7 +1,6 @@
 plugins {
     id 'java'
     id 'application'
-    id 'distribution'
     id "org.beryx.jlink" version "2.24.2"
 }
 
@@ -44,6 +43,9 @@ jlink {
                     "easytext.algorithm.coleman",
                     "easytext.algorithm.kincaid",
                     "easytext.algorithm.naivesyllablecounter",
+                    "jdk.crypto.ec",    // required for Netty to do TLS
+                    "jdk.naming.dns",   // required for Netty, e.g. to look up the default DNS
+                    "java.management",  // required for Netty, e.g. to look up the current PID
                     jlink.mergedModuleName.get()]
         }
         //jvmArgs = ['-Dlog4j.configurationFile=./log4j2.xml']

@@ -42,7 +42,10 @@ public class Main {
                                 .map(ServiceLoader.Provider::get)
                                 .map(analyzer -> "%s: %f".formatted(analyzer.getName(), analyzer.analyze(text))))
                         .onSuccess(analysisResults -> response.end(analysisResults.collect(Collectors.joining("\n"))))
-                        .onFailure(ex -> response.setStatusCode(500).end(ex.getMessage()));
+                        .onFailure(ex -> {
+                            ex.printStackTrace(System.err);
+                            response.setStatusCode(500).end(ex.getMessage() + "\n");
+                        });
             }
 
         });
