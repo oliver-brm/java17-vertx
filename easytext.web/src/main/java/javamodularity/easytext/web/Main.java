@@ -1,13 +1,12 @@
 package javamodularity.easytext.web;
 
 
-import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerOptions;
 import javamodularity.easytext.algorithm.api.Analyzer;
 import javamodularity.easytext.algorithm.api.Preprocessing;
 import javamodularity.easytext.pagefetch.WikipediaFetcher;
 
-import java.util.List;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 
@@ -20,7 +19,7 @@ public class Main {
         var wikipediaFetcher = ServiceLoader.load(WikipediaFetcher.class).findFirst().orElseThrow();
         var analyzers = ServiceLoader.load(Analyzer.class);
         var vertx = ServiceLoader.load(Vertx.class).findFirst().orElseThrow();
-        var server = vertx.createHttpServer();
+        var server = vertx.createHttpServer(new HttpServerOptions().setReusePort(true));
 
         server.requestHandler(request -> {
             var response = request.response();
@@ -50,7 +49,11 @@ public class Main {
 
         });
 
-        server.listen(port, result -> System.out.printf("Server listening on port %d: %s\n\n", port, result.succeeded()));
+        server.listen(port, result -> {
+            if (vertx.isNativeTransportEnabled())
+                System.out.println("Using native transport");
+            System.out.printf("Server listening on port %d: %s\n\n", port, result.succeeded());
+        });
     }
 
 }

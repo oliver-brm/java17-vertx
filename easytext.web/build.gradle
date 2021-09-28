@@ -25,6 +25,7 @@ application {
     mainModule = "easytext.web"
 }
 jlink {
+    enableCds()
     mergedModule {
         mergedModuleName = "easytext.mergedmodule"
         uses "io.vertx.core.spi.VerticleFactory"
