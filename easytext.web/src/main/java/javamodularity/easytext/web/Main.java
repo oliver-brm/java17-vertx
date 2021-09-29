@@ -16,6 +16,7 @@ public class Main {
 
     public static void main(String[] args) {
 
+        var startNanos = System.nanoTime();
         var wikipediaFetcher = ServiceLoader.load(WikipediaFetcher.class).findFirst().orElseThrow();
         var analyzers = ServiceLoader.load(Analyzer.class);
         var vertx = ServiceLoader.load(Vertx.class).findFirst().orElseThrow();
@@ -50,8 +51,20 @@ public class Main {
         });
 
         server.listen(port, result -> {
-            if (vertx.isNativeTransportEnabled())
+            if (vertx.isNativeTransportEnabled()) {
                 System.out.println("Using native transport");
+            }
+            System.out.println("""
+                    ┏━━━┓━━━━━━━━━━━━━━━┓━━━━━━┏┓━┓
+                    ┃┏━━┛━━━━━━━━━━━┏┓┏┓┃━━━━━━┛┗┓┃
+                    ┃┗━━┓━━┓━━━┓┓━┏┓┛┃┃┗┛━━┓┓┏┓┓┏┛┃
+                    ┃┏━━┛━┓┃━━━┫┃━┃┃━┃┃━━┏┓┃╋╋┛┃┃━┛
+                    ┃┗━━┓┗┛┗┓━━┃┗━┛┃┏┛┗┓━┃━┫╋╋┓┃┗┓┓
+                    ┗━━━┛━━━┛━━┛━┓┏┛┗━━┛━━━┛┛┗┛┗━┛┛
+                    ━━━━━━━━━━━━━┛┃━━━━━━━━━━━━━━━━
+                    ━━━━━━━━━━━━━━┛━━━━━━━━━━━━━━━━
+                    """);
+            System.out.printf("Startup finished after %.2f ms\n", (System.nanoTime() - startNanos) / 1000000000d);
             System.out.printf("Server listening on port %d: %s\n\n", port, result.succeeded());
         });
     }
